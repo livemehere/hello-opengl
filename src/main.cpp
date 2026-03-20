@@ -1,7 +1,14 @@
 #include <GLFW/glfw3.h>
+#include <iostream>
+
+void error_callback(int error, const char *desc) {
+  std::cout << error << "Error : " << desc << std::endl;
+}
 
 int main() {
   GLFWwindow *window;
+
+  glfwSetErrorCallback(error_callback);
 
   if (!glfwInit()) {
     return -1;
