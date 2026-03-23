@@ -3,6 +3,8 @@
 #include <OpenGL/gl3.h>
 #include <iostream>
 
+#include "utils.hpp"
+
 void error_callback(int error, const char *desc) {
   std::cout << error << "Error : " << desc << std::endl;
 }
@@ -60,13 +62,8 @@ int main() {
   // ========================== start ==========================
 
   // 4. vertex shader 작성
-  const char *vertexShaderSrc =
-      "#version 330 core\n"
-      "layout (location = 0) in vec3 aPos;\n"
-      "void main()\n"
-      "{\n"
-      "gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-      "}\n";
+  std::string vertexStr = readFile("../src/vertex.vs");
+  const char *vertexShaderSrc = vertexStr.c_str();
 
   // 5. vertex shader compile
   unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -74,13 +71,8 @@ int main() {
   glCompileShader(vertexShader);
 
   // 6. Fragment shader
-  const char *fragmentShaderSrc = "#version 330 core\n"
-                                  "out vec4 FragColor;\n"
-                                  "void main()\n"
-                                  "{\n"
-                                  "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0);\n"
-                                  "}\n";
-
+  std::string fragmentStr = readFile("../src/fragment.fs");
+  const char *fragmentShaderSrc = fragmentStr.c_str();
   unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragmentShader, 1, &fragmentShaderSrc, NULL);
   glCompileShader(fragmentShader);
