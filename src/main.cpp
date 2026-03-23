@@ -51,6 +51,8 @@ int main() {
 
   glfwMakeContextCurrent(window); // 1. creat OpenGL context
 
+  // 레티나 디스플레이는 실제 픽셀 수가 더 많기 때문에, 버퍼 사이즈를 가져와서
+  // 뷰포트를 설정해준다.
   int bufferWidth, bufferHeight;
   glfwGetFramebufferSize(window, &bufferWidth, &bufferHeight);
   glViewport(0, 0, bufferWidth, bufferHeight);
