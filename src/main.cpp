@@ -3,6 +3,9 @@
 #include <OpenGL/gl3.h>
 #include <iostream>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include "utils.hpp"
 
 void error_callback(int error, const char *desc) {
