@@ -89,9 +89,10 @@ int main() {
 
   // vertex
   float vertices[] = {
-      -0.5f, -0.5f, 0.0f, // left
-      0.5f,  -0.5f, 0.0f, // right
-      0.0f,  0.5f,  0.0f, // top
+      // point, color
+      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // left
+      0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // right
+      0.0f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f  // top
   };
 
   // buffer 객체 ID 생성
@@ -108,15 +109,18 @@ int main() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
   // 데이터 해석방법 설정 (0번 속성은 float 3개가 1세트이다)
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0); // 0번 속성 스위치 on
+
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1); // 1번 속성 스위치 on
 
   // 다른곳에서 실수로 건들지 않게 해제
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
   while (!glfwWindowShouldClose(window)) {
-
     handleInput(window);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
