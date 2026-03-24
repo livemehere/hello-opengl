@@ -4,7 +4,7 @@ project(hello-opengl LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
-file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/*.cpp" "src/*.hpp")
+file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/*.cpp")
 
 add_executable(${PROJECT_NAME} ${sources})
 
