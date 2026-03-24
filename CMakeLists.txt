@@ -8,11 +8,16 @@ file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/*.cpp")
 
 add_executable(${PROJECT_NAME} ${sources})
 
+# add_definitions(-DGLFW_INCLUDE_NONE)
+
 target_include_directories(${PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/external/include)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/external/lib/libglfw.3.dylib
   "-framework OpenGL"
+  "-framework Cocoa"
+  "-framework IOKit"
+  "-framework CoreVideo"
 )
 

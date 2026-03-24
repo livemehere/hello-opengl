@@ -1,5 +1,5 @@
+// #define GLFW_INCLUDE_GLCOREARB
 #include <GLFW/glfw3.h>
-#include <OpenGL/gl.h>
 #include <iostream>
 
 // 논리적인 사이즈
@@ -45,6 +45,7 @@ int main() {
 
   if (!glfwInit()) {
     std::cout << "GLFW init fail" << std::endl;
+    glfwTerminate();
     return -1;
   }
 
