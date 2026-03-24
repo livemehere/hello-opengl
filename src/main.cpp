@@ -28,13 +28,12 @@ void SetViewSize(GLFWwindow *window) {
 
 int main() {
 
-  // glfw init
   glfwInit();
-  // set opengl version(major, minor)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  // set use only modern functions (disable legacy)
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_PROFILE,
+                 GLFW_OPENGL_CORE_PROFILE); // set use only modern functions
+                                            // (disable legacy)
 
   // TODO: 성틍 및 결과 테스트 해보기
   // #ifdef __APPLE__
@@ -56,22 +55,17 @@ int main() {
     glfwTerminate();
     return -1;
   }
-
-  glfwSetKeyCallback(window, HandleKey);
-
-  // create context (gl)
-  glfwMakeContextCurrent(window);
-  // load glad (skip on macos)
-  // set viewport
   SetViewSize(window);
-  // while loop
+
+  glfwMakeContextCurrent(window);
+  glfwSetKeyCallback(window, HandleKey);
+  // load glad (skip on macos)
+
   while (!glfwWindowShouldClose(window)) {
     // draw
     glfwPollEvents();
   }
-  // destory window
   glfwDestroyWindow(window);
-  // terminate glfw
   glfwTerminate();
 
   return 0;
