@@ -2,6 +2,7 @@
 #include <OpenGL/gl.h>
 #include <iostream>
 
+// 논리적인 사이즈
 constexpr int w = 800;
 constexpr int h = 600;
 
@@ -19,6 +20,12 @@ void HandleKey(GLFWwindow *window, int key, int scancoode, int action,
   }
 }
 
+void SetViewSize(GLFWwindow *window) {
+  int w, h;
+  glfwGetFramebufferSize(window, &w, &h);
+  glViewport(0, 0, w, h);
+}
+
 int main() {
 
   // glfw init
@@ -28,6 +35,11 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   // set use only modern functions (disable legacy)
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+  // TODO: 성틍 및 결과 테스트 해보기
+  // #ifdef __APPLE__
+  //   glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
+  // #endif
 
   glfwSetErrorCallback(OnError);
 
@@ -50,7 +62,7 @@ int main() {
   glfwMakeContextCurrent(window);
   // load glad (skip on macos)
   // set viewport
-  glViewport(0, 0, w, h);
+  SetViewSize(window);
   // while loop
   while (!glfwWindowShouldClose(window)) {
     // draw
