@@ -40,15 +40,15 @@ int main() {
   //   glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
   // #endif
 
+  // 1.init
   glfwSetErrorCallback(OnError);
-
   if (!glfwInit()) {
     std::cout << "GLFW init fail" << std::endl;
     glfwTerminate();
     return -1;
   }
 
-  // create window (fail check)
+  // 2.create window (fail check)
   GLFWwindow *window = glfwCreateWindow(w, h, "Hello OpenGL", NULL, NULL);
   if (!window) {
     std::cout << "Error while Create GLFW window" << std::endl;
@@ -56,11 +56,11 @@ int main() {
     return -1;
   }
   SetViewSize(window);
-
   glfwMakeContextCurrent(window);
-  glfwSetKeyCallback(window, HandleKey);
-  // load glad (skip on macos)
+  // ---
 
+  // 3.loop
+  glfwSetKeyCallback(window, HandleKey);
   while (!glfwWindowShouldClose(window)) {
     // draw
     glfwPollEvents();
