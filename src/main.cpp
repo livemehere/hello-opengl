@@ -1,150 +1,111 @@
+#define GLFW_INCLUDE_GLCOREARB
+#include "Shader.hpp"
 #include <GLFW/glfw3.h>
-#include <OpenGL/gl.h>
-#include <OpenGL/gl3.h>
 #include <iostream>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+// 논리적인 사이즈
+constexpr int w = 800;
+constexpr int h = 600;
 
-#include "utils.hpp"
+std::string vsSrc = R"(
+  #version 330 core
+  layout (location = 0) in vec3 aPos;
+  
+  void main()
+  {
+    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);
+  }
+)";
 
-void error_callback(int error, const char *desc) {
-  std::cout << error << "Error : " << desc << std::endl;
+std::string fsCrc = R"(
+  #version 330 core
+  out vec4 FragColor;
+
+  void main()
+  {
+    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+  }
+)";
+
+void OnError(int error, const char *desc) {
+  std::cout << error << desc << std::endl;
 }
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-  int bufferWidth, bufferHeight;
-  glfwGetFramebufferSize(window, &bufferWidth, &bufferHeight);
-  glViewport(0, 0, bufferWidth, bufferHeight);
-  std::cout << "resize!!" << std::endl;
-}
+void HandleKey(GLFWwindow *window, int key, int scancoode, int action,
+               int mods) {
+  std::cout << key << " " << scancoode << " " << action << " " << mods
+            << std::endl;
 
-void handleInput(GLFWwindow *window) {
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-    glfwSetWindowShouldClose(window, true);
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
 }
 
-constexpr int width = 1280;
-constexpr int height = 720;
+void SetViewSize(GLFWwindow *window) {
+  int w, h;
+  glfwGetFramebufferSize(window, &w, &h);
+  glViewport(0, 0, w, h);
+}
 
 int main() {
-  GLFWwindow *window;
 
-  glfwSetErrorCallback(error_callback);
+  glfwInit();
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE,
+                 GLFW_OPENGL_CORE_PROFILE); // set use only modern functions
+                                            // (disable legacy)
 
+  // TODO: 성틍 및 결과 테스트 해보기
+  // #ifdef __APPLE__
+  //   glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
+  // #endif
+
+  // 1.init
+  glfwSetErrorCallback(OnError);
   if (!glfwInit()) {
-    std::cout << "Could not start GLFW" << std::endl;
+    std::cout << "GLFW init fail" << std::endl;
+    glfwTerminate();
     return -1;
   }
 
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  // 2.create window (fail check)
+  GLFWwindow *window = glfwCreateWindow(w, h, "Hello OpenGL", NULL, NULL);
+  if (!window) {
+    std::cout << "Error while Create GLFW window" << std::endl;
+    glfwTerminate();
+    return -1;
+  }
+  SetViewSize(window);
+  glfwMakeContextCurrent(window);
 
-  // 모던하게 가겠다.
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  Shader triangle(vsSrc, fsCrc,
+                  {
+                      -0.5f,
+                      -0.5f,
+                      0.0f,
+                      //
+                      0.5f,
+                      -0.5f,
+                      0.0f,
+                      //
+                      0.0f,
+                      0.5f,
+                      0.0f,
+                  }
 
-  // 맥에서는 아래도, 모던하게 가겠다는 의미.
-#ifdef __APPLE__
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+  );
 
-  window = glfwCreateWindow(width, height, "Hello OpenGl", NULL, NULL);
-
-  // 리사이징 될때마다 viewPort 재정의 필요
-  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-  glfwMakeContextCurrent(window); // 1. creat OpenGL context
-
-  // 레티나 디스플레이는 실제 픽셀 수가 더 많기 때문에, 버퍼 사이즈를 가져와서
-  // 뷰포트를 설정해준다.
-  int bufferWidth, bufferHeight;
-  glfwGetFramebufferSize(window, &bufferWidth, &bufferHeight);
-  glViewport(0, 0, bufferWidth, bufferHeight);
-
-  // ========================== start ==========================
-
-  // 4. vertex shader 작성
-  std::string vertexStr = readFile("../src/vertex.vs");
-  const char *vertexShaderSrc = vertexStr.c_str();
-
-  // 5. vertex shader compile
-  unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSrc, NULL);
-  glCompileShader(vertexShader);
-
-  // 6. Fragment shader
-  std::string fragmentStr = readFile("../src/fragment.fs");
-  const char *fragmentShaderSrc = fragmentStr.c_str();
-  unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSrc, NULL);
-  glCompileShader(fragmentShader);
-
-  // 7. shader program
-  unsigned int shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
-
-  // program 에 합치고나서는 제거
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
-
-  // vertex
-  float vertices[] = {
-      // point, color
-      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // left
-      0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // right
-      0.0f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f  // top
-  };
-
-  // buffer 객체 ID 생성
-  unsigned int VBO, VAO;
-  glGenVertexArrays(1, &VAO); // 설명서
-  glGenBuffers(1, &VBO);      // 데이터 상자
-
-  glBindVertexArray(VAO);
-
-  // vertex buffer 타입으로 지정
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-  // gpu buffer 에 데이터 복사
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  // 데이터 해석방법 설정 (0번 속성은 float 3개가 1세트이다)
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0); // 0번 속성 스위치 on
-
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1); // 1번 속성 스위치 on
-
-  // 다른곳에서 실수로 건들지 않게 해제
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-
+  // 3.loop
+  glfwSetKeyCallback(window, HandleKey);
   while (!glfwWindowShouldClose(window)) {
-    handleInput(window);
-
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glUseProgram(shaderProgram);
-
-    float time = glfwGetTime();
-    float greenV = (sin(time) / 2.0f) + 0.5f;
-    int vertexColorLoc = glGetUniformLocation(shaderProgram, "cpuColor");
-
-    glUniform4f(vertexColorLoc, 0.0f, greenV, 0.0f, 1.0f);
-
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
+    // draw
+    triangle.Use();
     glfwSwapBuffers(window);
+
     glfwPollEvents();
   }
-
-  // 모든 리소스 정리
+  glfwDestroyWindow(window);
   glfwTerminate();
 
   return 0;
