@@ -4,6 +4,9 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "../external/include/stb_image.h"
+
 // 논리적인 사이즈
 constexpr int w = 800;
 constexpr int h = 600;
@@ -112,6 +115,10 @@ int main() {
                   {0, 1, 2, 1, 2, 3}
 
   );
+
+  int imgW, imgH, numColCh;
+  unsigned char *bytes =
+      stbi_load("../assets/wall.png", &imgW, &imgH, &numColCh, 0);
 
   // 3.loop
   glfwSetKeyCallback(window, HandleKey);
