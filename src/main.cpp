@@ -1,3 +1,4 @@
+#include <OpenGL/gl.h>
 #define GLFW_INCLUDE_GLCOREARB
 #include "Shader.hpp"
 #include <GLFW/glfw3.h>
@@ -23,7 +24,7 @@ std::string fsCrc = R"(
 
   void main()
   {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    FragColor = vec4(1.0f, 0.9f, 0.2f, 0.1f);
   }
 )";
 
@@ -76,8 +77,8 @@ int main() {
     glfwTerminate();
     return -1;
   }
-  SetViewSize(window);
   glfwMakeContextCurrent(window);
+  SetViewSize(window);
 
   Shader triangle(vsSrc, fsCrc,
                   {
@@ -98,7 +99,16 @@ int main() {
 
   // 3.loop
   glfwSetKeyCallback(window, HandleKey);
+
+  // alpha 사용하도록 (기존 비활성화임)
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   while (!glfwWindowShouldClose(window)) {
+
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
     // draw
     triangle.Use();
     glfwSwapBuffers(window);
