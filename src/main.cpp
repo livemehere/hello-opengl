@@ -1,10 +1,31 @@
-// #define GLFW_INCLUDE_GLCOREARB
+#define GLFW_INCLUDE_GLCOREARB
+#include "Shader.hpp"
 #include <GLFW/glfw3.h>
 #include <iostream>
 
 // 논리적인 사이즈
 constexpr int w = 800;
 constexpr int h = 600;
+
+std::string vsSrc = R"(
+  #version 330 core
+  layout (location = 0) in vec3 aPos;
+  
+  void main()
+  {
+    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);
+  }
+)";
+
+std::string fsCrc = R"(
+  #version 330 core
+  out vec4 FragColor;
+
+  void main()
+  {
+    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+  }
+)";
 
 void OnError(int error, const char *desc) {
   std::cout << error << desc << std::endl;
@@ -57,12 +78,31 @@ int main() {
   }
   SetViewSize(window);
   glfwMakeContextCurrent(window);
-  // ---
+
+  Shader triangle(vsSrc, fsCrc,
+                  {
+                      -0.5f,
+                      -0.5f,
+                      0.0f,
+                      //
+                      0.5f,
+                      -0.5f,
+                      0.0f,
+                      //
+                      0.0f,
+                      0.5f,
+                      0.0f,
+                  }
+
+  );
 
   // 3.loop
   glfwSetKeyCallback(window, HandleKey);
   while (!glfwWindowShouldClose(window)) {
     // draw
+    triangle.Use();
+    glfwSwapBuffers(window);
+
     glfwPollEvents();
   }
   glfwDestroyWindow(window);
