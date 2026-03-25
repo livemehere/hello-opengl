@@ -82,6 +82,7 @@ int main() {
 
   Shader triangle(vsSrc, fsCrc,
                   {
+                      // bottom-left
                       -0.5f,
                       -0.5f,
                       0.0f,
@@ -90,9 +91,22 @@ int main() {
                       -0.5f,
                       0.0f,
                       //
-                      0.0f,
+                      -0.5f,
                       0.5f,
                       0.0f,
+                      // top-right
+                      -0.5f,
+                      0.5f,
+                      0.0f,
+                      //
+                      0.5f,
+                      0.5f,
+                      0.0f,
+                      //
+                      0.5f,
+                      -0.5f,
+                      0.0f,
+
                   }
 
   );
