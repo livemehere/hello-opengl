@@ -13,14 +13,18 @@ struct Shader {
   GLuint program;
   GLuint VAO;
   GLuint VBO;
+  GLuint EBO;
   int count;
+  int indiciesCount;
 
   std::vector<GLfloat> vertices;
 
   Shader(const std::string &vs, const std::string &fs,
-         const std::vector<GLfloat> &vertices) {
+         const std::vector<GLfloat> &vertices,
+         const std::vector<GLuint> &indices) {
 
     count = vertices.size() / 3;
+    indiciesCount = indices.size();
 
     // shader compile
     const char *vsSrc = vs.c_str();
@@ -45,6 +49,7 @@ struct Shader {
     // alloc 왜 여긴 &VAO, &VBO 일까? = C의 쓰기모드
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     // recording start 여긴 왜 & 없이? = C 의 읽기 모드
     glBindVertexArray(VAO);
@@ -53,6 +58,11 @@ struct Shader {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat),
                  vertices.data(), GL_STATIC_DRAW);
+
+    // EBO
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint),
+                 indices.data(), GL_STATIC_DRAW);
 
     // VBO 데이터 해석 방법 정의
     // vertex Shader 의 layout 0 번 포트 사용 / 3개씩 읽어라 / float 타입이다 /
@@ -73,6 +83,7 @@ struct Shader {
   void Use() {
     glUseProgram(program);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, count);
+    // glDrawArrays(GL_TRIANGLES, 0, count);
+    glDrawElements(GL_TRIANGLES, indiciesCount, GL_UNSIGNED_INT, 0);
   }
 };
