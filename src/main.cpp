@@ -18,7 +18,7 @@ static void DebugEnv() {
 
   log("OpenGL Version : {}", glVersion);
   log("OpenGL Model : {}", glRenderer);
-  log("OpenGL Vendor : {}", glVendor);
+  log("OpenGL Vendor : {}\n", glVendor);
 }
 
 static unsigned int CompileShader(GLenum type, const std::string& shaderSource) {
@@ -57,7 +57,7 @@ static unsigned int CreateShader(const std::string& vertexShader,
 
   int success;
   char infoLog[512];
-  glGetShaderiv(program, GL_LINK_STATUS, &success);
+  glGetProgramiv(program, GL_LINK_STATUS, &success);
   if (!success) {
     glGetProgramInfoLog(program, 512, NULL, infoLog);
     errorLog("Program Link Error : {}", infoLog);
@@ -73,6 +73,7 @@ static unsigned int CreateShader(const std::string& vertexShader,
 struct Output {
   unsigned int program;
   unsigned int VAO;
+  unsigned int VBO;
 };
 
 Output CreateTriangle() {
@@ -120,7 +121,7 @@ Output CreateTriangle() {
 
   glBindVertexArray(0);
 
-  return {program, VAO};
+  return {program, VAO, VBO};
 }
 
 int main() {
@@ -146,11 +147,14 @@ int main() {
 
   DebugEnv();
 
+  // create
   auto output = CreateTriangle();
 
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // use
     glUseProgram(output.program);
     glBindVertexArray(output.VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -159,6 +163,11 @@ int main() {
 
     glfwPollEvents();
   }
+
+  // clean up
+  glDeleteVertexArrays(1, &output.VAO);
+  glDeleteBuffers(1, &output.VBO);
+  glDeleteProgram(output.program);
 
   glfwTerminate();
 
