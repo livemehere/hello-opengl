@@ -15,6 +15,7 @@ struct Output {
   unsigned int program;
   unsigned int VAO;
   unsigned int VBO;
+  int totalPoints;
 };
 
 static void DebugEnv() {
@@ -110,7 +111,9 @@ Output CreateTriangle() {
       0.0f, 0.5f, 0.0f,0.0f, 0.0f, 1.0f // top
   };
   // clang-format on
-  int stride = 6 * sizeof(float);
+  int count = 6;
+  int stride = count * sizeof(float);
+  int totalPoints = buffers.size() / count;
 
   // 사이즈, 데이터의 시작 포인터를 GPU 에 할당.
   unsigned int VBO, VAO;
@@ -133,7 +136,7 @@ Output CreateTriangle() {
 
   glBindVertexArray(0);
 
-  return {program, VAO, VBO};
+  return {program, VAO, VBO, totalPoints};
 }
 
 int main() {
@@ -169,7 +172,7 @@ int main() {
     // use
     glUseProgram(output.program);
     glBindVertexArray(output.VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, output.totalPoints);
 
     glfwSwapBuffers(window);
 
