@@ -1,3 +1,4 @@
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <OpenGL/gl.h>
 #include <spdlog/common.h>
@@ -5,6 +6,8 @@
 
 #define log spdlog::info
 #define errorLog spdlog::error
+
+void DebugEnv();
 
 int main() {
 
@@ -15,6 +18,10 @@ int main() {
     return -1;
   }
 
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
   window = glfwCreateWindow(800, 600, "Hello opengl", NULL, NULL);
   if (!window) {
     glfwTerminate();
@@ -23,6 +30,8 @@ int main() {
   }
 
   glfwMakeContextCurrent(window);
+
+  DebugEnv();
 
   while (!glfwWindowShouldClose(window)) {
 
@@ -36,4 +45,14 @@ int main() {
   glfwTerminate();
 
   return 0;
+}
+
+void DebugEnv() {
+  const char *glVersion = (const char *)glGetString(GL_VERSION);
+  const char *glRenderer = (const char *)glGetString(GL_RENDERER);
+  const char *glVendor = (const char *)glGetString(GL_VENDOR);
+
+  log("OpenGL Version : {}", glVersion);
+  log("OpenGL Model : {}", glRenderer);
+  log("OpenGL Vendor : {}", glVendor);
 }
