@@ -79,18 +79,25 @@ static unsigned int CreateShader(const std::string& vertexShader,
 Output CreateTriangle() {
   std::string vertexSrc = R"(
     #version 330 core
+
     layout (location = 0) in vec3 pos;
+    layout (location = 1) in vec3 inColor;
+
+    out vec3 color;
+
     void main() {
       gl_Position = vec4(pos.xyz,1.0);
+      color = inColor;
     }
   )";
   std::string fragmentSrc = R"(
     #version 330 core
 
-    out vec4 color;
+    in vec3 color;
+    out vec4 fragment;
 
     void main() {
-      color = vec4(0.2f, 0.3f, 0.0f, 1.0f);
+      fragment = vec4(color, 1.0f);
     }
   )";
 
@@ -98,11 +105,12 @@ Output CreateTriangle() {
 
   // clang-format off
   std::vector<float> buffers = {
-      -0.5f, -0.5f, 0.0f, // left
-      0.5f, -0.5f, 0.0f, // right
-      0.0f, 0.5f, 0.0f, // top
+      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,// left
+      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // right
+      0.0f, 0.5f, 0.0f,0.0f, 0.0f, 1.0f // top
   };
   // clang-format on
+  int stride = 6 * sizeof(float);
 
   // 사이즈, 데이터의 시작 포인터를 GPU 에 할당.
   unsigned int VBO, VAO;
@@ -114,10 +122,14 @@ Output CreateTriangle() {
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, buffers.size() * sizeof(float), buffers.data(), GL_STATIC_DRAW);
 
-  int layout = 0;
+  int posLayout = 0;
   // layout 0번 / 3개씩 써라 / float 타입 / normalize 안함 / 3 * float 간격 / 오프셋 0
-  glVertexAttribPointer(layout, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(layout);
+  glVertexAttribPointer(posLayout, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+  glEnableVertexAttribArray(posLayout);
+
+  int colorLayout = 1;
+  glVertexAttribPointer(colorLayout, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(colorLayout);
 
   glBindVertexArray(0);
 
