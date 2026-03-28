@@ -11,6 +11,12 @@
 #define log spdlog::info
 #define errorLog spdlog::error
 
+struct Output {
+  unsigned int program;
+  unsigned int VAO;
+  unsigned int VBO;
+};
+
 static void DebugEnv() {
   const char* glVersion = (const char*)glGetString(GL_VERSION);
   const char* glRenderer = (const char*)glGetString(GL_RENDERER);
@@ -69,12 +75,6 @@ static unsigned int CreateShader(const std::string& vertexShader,
   log("program link success");
   return program;
 }
-
-struct Output {
-  unsigned int program;
-  unsigned int VAO;
-  unsigned int VBO;
-};
 
 Output CreateTriangle() {
   std::string vertexSrc = R"(
