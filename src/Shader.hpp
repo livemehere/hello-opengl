@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <OpenGL/gl.h>
 #include <OpenGL/glext.h>
 #define GLFW_INCLUDE_GLCOREARB // glGenVertexArrays << 이거쓰려면 gl3.h
@@ -23,7 +24,7 @@ struct Shader {
          const std::vector<GLfloat> &vertices,
          const std::vector<GLuint> &indices) {
 
-    count = vertices.size() / 3;
+    count = vertices.size() / 5; // x,y,z,u,v
     indiciesCount = indices.size();
 
     // shader compile
@@ -34,9 +35,25 @@ struct Shader {
     glShaderSource(vertexShader, 1, &vsSrc, NULL);
     glCompileShader(vertexShader);
 
+    // vertex shader 컴파일 에러 체크
+    int success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+      glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+      std::cout << "ERROR: Vertex shader compilation failed\n" << infoLog << std::endl;
+    }
+
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fsSrc, NULL);
     glCompileShader(fragmentShader);
+
+    // fragment shader 컴파일 에러 체크
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+      glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+      std::cout << "ERROR: Fragment shader compilation failed\n" << infoLog << std::endl;
+    }
 
     program = glCreateProgram();
     glAttachShader(program, vertexShader);
@@ -65,14 +82,15 @@ struct Shader {
                  indices.data(), GL_STATIC_DRAW);
 
     // VBO 데이터 해석 방법 정의
-    // vertex Shader 의 layout 0 번 포트 사용 / 3개씩 읽어라 / float 타입이다 /
-    // 0~1 정규화 여부 / 읽을 단위? 이걸 왜또주지 size 3을 줬는데도.. / 빈포인터
-    // 하나 전달?
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
+    // 위치 attribute (location 0) - x, y, z
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat),
                           (void *)0);
-
-    // layout port 활성화 (이거랑 위에 함수 첫번째 인자랑 동일해야하나?)
     glEnableVertexAttribArray(0);
+
+    // 텍스처 좌표 attribute (location 1) - u, v
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat),
+                          (void *)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
 
     // 하나의 컨텍스트(붓) 이기 때문에, 내가 할일이 끝났으면, 내 리소스는
     // 사용하지 않도록 정리 작업 (선택적)

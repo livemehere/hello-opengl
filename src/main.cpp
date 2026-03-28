@@ -1,4 +1,5 @@
 #include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
 #define GLFW_INCLUDE_GLCOREARB
 #include "Shader.hpp"
 #include <GLFW/glfw3.h>
@@ -14,10 +15,14 @@ constexpr int h = 600;
 std::string vsSrc = R"(
   #version 330 core
   layout (location = 0) in vec3 aPos;
-  
+  layout (location = 1) in vec2 aTexCoord;
+
+  out vec2 TexCoord;
+
   void main()
   {
     gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);
+    TexCoord = aTexCoord;
   }
 )";
 
@@ -25,9 +30,12 @@ std::string fsCrc = R"(
   #version 330 core
   out vec4 FragColor;
 
+  in vec2 TexCoord;
+  uniform sampler2D ourTexture;
+
   void main()
   {
-    FragColor = vec4(1.0f, 0.9f, 0.2f, 0.1f);
+    FragColor = texture(ourTexture, TexCoord);
   }
 )";
 
@@ -89,36 +97,65 @@ int main() {
                       -0.5f,
                       -0.5f,
                       0.0f,
-                      //
+                      0.0f,
+                      0.0f,
+                      // bottom-right
                       0.5f,
                       -0.5f,
                       0.0f,
-                      //
+                      1.0f,
+                      0.0f,
+                      // top-left
                       -0.5f,
                       0.5f,
                       0.0f,
+                      0.0f,
+                      1.0f,
                       // top-right
-                      // -0.5f,
-                      // 0.5f,
-                      // 0.0f,
-                      //
                       0.5f,
                       0.5f,
                       0.0f,
-                      //
-                      // 0.5f,
-                      // -0.5f,
-                      // 0.0f,
-
+                      1.0f,
+                      1.0f,
                   },
                   // indices
                   {0, 1, 2, 1, 2, 3}
 
   );
 
+  stbi_set_flip_vertically_on_load(true);
   int imgW, imgH, numColCh;
   unsigned char *bytes =
       stbi_load("../assets/wall.png", &imgW, &imgH, &numColCh, 0);
+
+  if (!bytes) {
+    std::cout << "Img load Fail" << std::endl;
+    return -1;
+  }
+
+  unsigned int texture;
+  glGenTextures(1, &texture);
+
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgW, imgH, 0, GL_RGB,
+               GL_UNSIGNED_BYTE, bytes);
+  glGenerateMipmap(GL_TEXTURE_2D);
+
+  std::cout << "texture load success" << std::endl;
+
+  stbi_image_free(bytes);
+
+  // 텍스처 바인드
+  glBindTexture(GL_TEXTURE_2D, texture);
+
+  // 이건 0~1 범위를 벗어나는 경우에 대해서 어떻게 처리할건지
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+  // ?? mip-map 처리하겠다?
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                  GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   // 3.loop
   glfwSetKeyCallback(window, HandleKey);
