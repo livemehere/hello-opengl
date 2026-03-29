@@ -1,7 +1,5 @@
 #pragma once
 
-#include <OpenGL/gl.h>
-
 #include "Debug.hpp"
 
 class IndexBuffer {
@@ -15,7 +13,11 @@ class IndexBuffer {
     GLCall(
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW));
   }
-  ~IndexBuffer() { GLCall(glDeleteBuffers(1, &id)); }
+  ~IndexBuffer() {
+    GLCall(glDeleteBuffers(1, &id));
+
+    LOG("IndexBuffer 소멸됨");
+  }
 
   void Bind() const { GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id)); }
 

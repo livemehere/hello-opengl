@@ -13,7 +13,9 @@
 
 #include "Engine/Debug.hpp"
 #include "Engine/IndexBuffer.hpp"
+#include "Engine/VertexArray.hpp"
 #include "Engine/VertexBuffer.hpp"
+#include "Engine/VertexBufferyLayout.hpp"
 
 struct Output {
   unsigned int program;
@@ -94,57 +96,6 @@ unsigned int CreateShader(const std::string& vertexShader, const std::string& fr
   return program;
 }
 
-Output CreateTriangle() {
-  std::string vertexSrc = ReadFile("../assets/shaders/basic.vs");
-  std::string fragmentSrc = ReadFile("../assets/shaders/basic.fs");
-
-  unsigned int program = CreateShader(vertexSrc, fragmentSrc);
-
-  // clang-format off
-  std::vector<float> buffers = {
-      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,// bl
-      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // br
-      0.5f, 0.5f, 0.0f,0.0f, 0.0f, 1.0f, // tr
-
-      -0.5f, 0.5f, 0.0f,0.0f, 0.0f, 1.0f // tl
-  };
-
-  std::vector<unsigned int> indicies = {
-    0,1,2,
-    0,2,3
-  };
-
-  // clang-format on
-  int count = 6;  // xyz, rgb
-  int stride = count * sizeof(float);
-  int totalPoints = buffers.size() / count;
-  int totalIndicies = indicies.size();
-
-  // 사이즈, 데이터의 시작 포인터를 GPU 에 할당.
-  unsigned int VAO;
-  VertexBuffer vb(buffers.data(), buffers.size() * sizeof(float));
-  IndexBuffer ib(indicies.data(), indicies.size());
-
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
-
-  vb.Bind();
-  ib.Bind();
-
-  int posLayout = 0;
-  // layout 0번 / 3개씩 써라 / float 타입 / normalize 안함 / 3 * float 간격 / 오프셋 0
-  glVertexAttribPointer(posLayout, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
-  glEnableVertexAttribArray(posLayout);
-
-  int colorLayout = 1;
-  glVertexAttribPointer(colorLayout, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(colorLayout);
-
-  glBindVertexArray(0);
-
-  return {program, VAO, vb, ib, totalPoints, totalIndicies};
-}
-
 int main() {
   GLFWwindow* window;
 
@@ -170,8 +121,34 @@ int main() {
   DebugEnv();
 
   // create
-  auto output = CreateTriangle();
-  int colorLoc = glGetUniformLocation(output.program, "u_color");
+  std::string vertexSrc = ReadFile("../assets/shaders/basic.vs");
+  std::string fragmentSrc = ReadFile("../assets/shaders/basic.fs");
+
+  unsigned int program = CreateShader(vertexSrc, fragmentSrc);
+  int colorLoc = glGetUniformLocation(program, "u_color");
+
+  // clang-format off
+  std::vector<float> buffers = {
+      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,// bl
+      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // br
+      0.5f, 0.5f, 0.0f,0.0f, 0.0f, 1.0f, // tr
+
+      -0.5f, 0.5f, 0.0f,0.0f, 0.0f, 1.0f // tl
+  };
+  std::vector<unsigned int> indicies = {
+    0, 1, 2,
+    0, 2, 3
+  };
+  // clang-format on
+
+  VertexArray va;
+  VertexBuffer vb(buffers.data(), buffers.size() * sizeof(float));
+  IndexBuffer ib(indicies.data(), indicies.size());
+
+  VertexBufferLayout layout;
+  layout.Push<float>(3);
+  layout.Push<float>(3);
+  va.AddBuffer(vb, layout);
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   while (!glfwWindowShouldClose(window)) {
@@ -180,27 +157,25 @@ int main() {
     float time = glfwGetTime();
 
     // use
-    glUseProgram(output.program);
+    glUseProgram(program);
 
     float r = (sin(time) + 1.0f) / 2.0f;
     float g = (sin(time + 2.0f) + 1.0f) / 2.0f;
     float b = (sin(time + 3.0f) + 1.0f) / 2.0f;
     glUniform4f(colorLoc, r, g, b, 1.0f);
 
-    glBindVertexArray(output.VAO);  // begine(load)
-    glDrawElements(GL_TRIANGLES, output.totalIndicies, GL_UNSIGNED_INT, NULL);
-    glBindVertexArray(0);  // restore
+    va.Bind();
+    ib.Bind();
+    glDrawElements(GL_TRIANGLES, indicies.size(), GL_UNSIGNED_INT, NULL);
+    va.UnBind();
+    ib.UnBind();
 
     glfwSwapBuffers(window);
 
     glfwPollEvents();
   }
 
-  // clean up
-  glDeleteVertexArrays(1, &output.VAO);
-  output.vb.UnBind();
-  output.ib.UnBind();
-  glDeleteProgram(output.program);
+  glDeleteProgram(program);
 
   glfwTerminate();
 
