@@ -7,6 +7,7 @@
 
 #include "Engine/Debug.hpp"
 #include "Engine/IndexBuffer.hpp"
+#include "Engine/Renderer.hpp"
 #include "Engine/Shader.hpp"
 #include "Engine/Utils.hpp"
 #include "Engine/VertexArray.hpp"
@@ -88,28 +89,20 @@ int main() {
     ib.UnBind();
     shader.UnBind();
 
+    Renderer renderer;
+
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     while (!glfwWindowShouldClose(window)) {
-      glClear(GL_COLOR_BUFFER_BIT);
+      renderer.Clear();
 
       float time = glfwGetTime();
-
-      // use
-
       shader.Bind();
-      va.Bind();
-      ib.Bind();
-
       float r = (sin(time) + 1.0f) / 2.0f;
       float g = (sin(time + 2.0f) + 1.0f) / 2.0f;
       float b = (sin(time + 3.0f) + 1.0f) / 2.0f;
       shader.SetUniform4f("u_color", r, g, b, 1.0f);
-      glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, NULL);
 
-      va.UnBind();
-      vb.UnBind();
-      ib.UnBind();
-      shader.UnBind();
+      renderer.Draw(va, ib);
 
       glfwSwapBuffers(window);
 
