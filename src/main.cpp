@@ -6,55 +6,12 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <OpenGL/gl3.h>
-#include <spdlog/common.h>
-#include <spdlog/spdlog.h>
 
 #include <format>
 #include <fstream>
 #include <vector>
 
-#define log spdlog::info
-#define errorLog spdlog::error
-
-GLenum glCheckError_(const char* file, int line) {
-  GLenum errorCode = GL_NO_ERROR;
-  while ((errorCode = glGetError()) != GL_NO_ERROR) {
-    std::string error;
-    switch (errorCode) {
-      case GL_INVALID_ENUM:
-        error = "INVALID_ENUM";
-        break;
-      case GL_INVALID_VALUE:
-        error = "INVALID_VALUE";
-        break;
-      case GL_INVALID_OPERATION:
-        error = "INVALID_OPERATION";
-        break;
-      case GL_STACK_OVERFLOW:
-        error = "STACK_OVERFLOW";
-        break;
-      case GL_STACK_UNDERFLOW:
-        error = "STACK_UNDERFLOW";
-        break;
-      case GL_OUT_OF_MEMORY:
-        error = "OUT_OF_MEMORY";
-        break;
-      case GL_INVALID_FRAMEBUFFER_OPERATION:
-        error = "INVALID_FRAMEBUFFER_OPERATION";
-        break;
-    }
-    errorLog("{} | {} ({})", error, file, line);
-    return errorCode;
-  }
-  return errorCode;
-}
-#define glCheckError() glCheckError_(__FILE__, __LINE__)
-#define ASSERT(x) \
-  if (!(x)) __builtin_debugtrap();
-
-#define GLCall(x) \
-  x;              \
-  ASSERT(glCheckError() == GL_NO_ERROR)
+#include "Engine/Debug.h"
 
 struct Output {
   unsigned int program;
@@ -70,9 +27,9 @@ void DebugEnv() {
   const char* glRenderer = (const char*)glGetString(GL_RENDERER);
   const char* glVendor = (const char*)glGetString(GL_VENDOR);
 
-  log("OpenGL Version : {}", glVersion);
-  log("OpenGL Model : {}", glRenderer);
-  log("OpenGL Vendor : {}\n", glVendor);
+  LOG("OpenGL Version : {}", glVersion);
+  LOG("OpenGL Model : {}", glRenderer);
+  LOG("OpenGL Vendor : {}\n", glVendor);
 }
 
 std::string ReadFile(std::string path) {
@@ -100,9 +57,9 @@ unsigned int CompileShader(GLenum type, const std::string& shaderSource) {
   glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(shader, 512, NULL, infoLog);
-    errorLog("{} Shader Compile Error : {}", typeStr, infoLog);
+    ERROR_LOG("{} Shader Compile Error : {}", typeStr, infoLog);
   } else {
-    log("{} shader compile success", typeStr);
+    LOG("{} shader compile success", typeStr);
   }
 
   return shader;
@@ -124,9 +81,9 @@ unsigned int CreateShader(const std::string& vertexShader, const std::string& fr
   glGetProgramiv(program, GL_LINK_STATUS, &success);
   if (!success) {
     glGetProgramInfoLog(program, 512, NULL, infoLog);
-    errorLog("Program Link Error : {}", infoLog);
+    ERROR_LOG("Program Link Error : {}", infoLog);
   } else {
-    log("program link success");
+    LOG("program link success");
   }
 
   glDeleteShader(vs);
@@ -194,7 +151,7 @@ int main() {
   GLFWwindow* window;
 
   if (!glfwInit()) {
-    errorLog("Fail to Init GLFW");
+    ERROR_LOG("Fail to Init GLFW");
     return -1;
   }
 
@@ -205,7 +162,7 @@ int main() {
   window = glfwCreateWindow(800, 600, "Hello opengl", NULL, NULL);
   if (!window) {
     glfwTerminate();
-    errorLog("Fail to Create Window");
+    ERROR_LOG("Fail to Create Window");
     return -1;
   }
 
