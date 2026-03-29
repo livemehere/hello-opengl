@@ -123,7 +123,7 @@ Output CreateTriangle() {
   // 사이즈, 데이터의 시작 포인터를 GPU 에 할당.
   unsigned int VAO;
   VertexBuffer vb(buffers.data(), buffers.size() * sizeof(float));
-  IndexBuffer ib(indicies.data(), indicies.size() * sizeof(int));
+  IndexBuffer ib(indicies.data(), indicies.size());
 
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
