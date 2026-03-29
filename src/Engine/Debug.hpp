@@ -9,12 +9,10 @@
 
 #define ASSERT(x) \
   if (!(x)) __builtin_debugtrap();
-#define GLCall(x)                              \
-  do {                                         \
-    GLClearError();                            \
-    x;                                         \
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__)); \
-  } while (0)
+#define GLCall(x) \
+  GLClearError(); \
+  x;              \
+  ASSERT(GLLogCall(#x, __FILE__, __LINE__));
 
 inline void GLClearError() { while (glGetError() != GL_NO_ERROR); }
 

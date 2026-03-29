@@ -13,11 +13,7 @@ class IndexBuffer {
     GLCall(
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW));
   }
-  ~IndexBuffer() {
-    GLCall(glDeleteBuffers(1, &id));
-
-    LOG("IndexBuffer 소멸됨");
-  }
+  ~IndexBuffer() { GLCall(glDeleteBuffers(1, &id)); }
 
   void Bind() const { GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id)); }
 

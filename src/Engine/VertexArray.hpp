@@ -10,10 +10,7 @@ class VertexArray {
 
  public:
   VertexArray() { GLCall(glGenVertexArrays(1, &id)); }
-  ~VertexArray() {
-    GLCall(glDeleteVertexArrays(1, &id));
-    LOG("VertexArray 소멸됨");
-  }
+  ~VertexArray() { GLCall(glDeleteVertexArrays(1, &id)); }
 
   void AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout) {
     Bind();

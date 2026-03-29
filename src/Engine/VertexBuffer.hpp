@@ -12,10 +12,7 @@ class VertexBuffer {
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, id));
     GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
   }
-  ~VertexBuffer() {
-    GLCall(glDeleteBuffers(1, &id));
-    LOG("VertexBuffer 소멸됨");
-  }
+  ~VertexBuffer() { GLCall(glDeleteBuffers(1, &id)); }
 
   void Bind() const { GLCall(glBindBuffer(GL_ARRAY_BUFFER, id)); }
   void UnBind() const { GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0)); }
