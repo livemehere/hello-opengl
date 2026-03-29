@@ -19,7 +19,9 @@ struct Output {
   unsigned int program;
   unsigned int VAO;
   unsigned int VBO;
+  unsigned int EBO;
   int totalPoints;
+  int totalIndicies;
 };
 
 void DebugEnv() {
@@ -103,24 +105,34 @@ Output CreateTriangle() {
       0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // br
       0.5f, 0.5f, 0.0f,0.0f, 0.0f, 1.0f, // tr
 
-      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,// bl
-      0.5f, 0.5f, 0.0f,0.0f, 0.0f, 1.0f, // tr
       -0.5f, 0.5f, 0.0f,0.0f, 0.0f, 1.0f // tl
   };
+
+  std::vector<unsigned int> indicies = {
+    0,1,2,
+    0,2,3
+  };
+
   // clang-format on
-  int count = 6;
+  int count = 6;  // xyz, rgb
   int stride = count * sizeof(float);
   int totalPoints = buffers.size() / count;
+  int totalIndicies = indicies.size();
 
   // 사이즈, 데이터의 시작 포인터를 GPU 에 할당.
-  unsigned int VBO, VAO;
+  unsigned int VBO, VAO, EBO;
   glGenBuffers(1, &VBO);
   glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &EBO);
 
   glBindVertexArray(VAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, buffers.size() * sizeof(float), buffers.data(), GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(unsigned int), indicies.data(),
+               GL_STATIC_DRAW);
 
   int posLayout = 0;
   // layout 0번 / 3개씩 써라 / float 타입 / normalize 안함 / 3 * float 간격 / 오프셋 0
@@ -133,7 +145,7 @@ Output CreateTriangle() {
 
   glBindVertexArray(0);
 
-  return {program, VAO, VBO, totalPoints};
+  return {program, VAO, VBO, EBO, totalPoints, totalIndicies};
 }
 
 int main() {
@@ -169,7 +181,8 @@ int main() {
     // use
     glUseProgram(output.program);
     glBindVertexArray(output.VAO);
-    glDrawArrays(GL_TRIANGLES, 0, output.totalPoints);
+    // glDrawArrays(GL_TRIANGLES, 0, output.totalPoints);
+    glDrawElements(GL_TRIANGLES, output.totalIndicies, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
 
@@ -179,6 +192,7 @@ int main() {
   // clean up
   glDeleteVertexArrays(1, &output.VAO);
   glDeleteBuffers(1, &output.VBO);
+  glDeleteBuffers(1, &output.EBO);
   glDeleteProgram(output.program);
 
   glfwTerminate();
