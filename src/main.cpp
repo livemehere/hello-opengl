@@ -9,7 +9,6 @@
 #include "Engine/IndexBuffer.hpp"
 #include "Engine/Renderer.hpp"
 #include "Engine/Shader.hpp"
-#include "Engine/Utils.hpp"
 #include "Engine/VertexArray.hpp"
 #include "Engine/VertexBuffer.hpp"
 #include "Engine/VertexBufferyLayout.hpp"
