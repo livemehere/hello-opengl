@@ -232,9 +232,9 @@ int main() {
     float b = (sin(time + 3.0f) + 1.0f) / 2.0f;
     glUniform4f(colorLoc, r, g, b, 1.0f);
 
-    glBindVertexArray(output.VAO);
-    // glDrawArrays(GL_TRIANGLES, 0, output.totalPoints);
+    glBindVertexArray(output.VAO);  // begine(load)
     glDrawElements(GL_TRIANGLES, output.totalIndicies, GL_UNSIGNED_INT, NULL);
+    glBindVertexArray(0);  // restore
 
     glfwSwapBuffers(window);
 
