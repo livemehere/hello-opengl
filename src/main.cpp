@@ -1,11 +1,15 @@
 #include <OpenGL/gl.h>
 #include <OpenGL/glext.h>
+
+#include <stdexcept>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <OpenGL/gl3.h>
 #include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 
+#include <format>
+#include <fstream>
 #include <vector>
 
 #define log spdlog::info
@@ -18,7 +22,7 @@ struct Output {
   int totalPoints;
 };
 
-static void DebugEnv() {
+void DebugEnv() {
   const char* glVersion = (const char*)glGetString(GL_VERSION);
   const char* glRenderer = (const char*)glGetString(GL_RENDERER);
   const char* glVendor = (const char*)glGetString(GL_VENDOR);
@@ -28,7 +32,18 @@ static void DebugEnv() {
   log("OpenGL Vendor : {}\n", glVendor);
 }
 
-static unsigned int CompileShader(GLenum type, const std::string& shaderSource) {
+std::string ReadFile(std::string path) {
+  std::ifstream file(path);
+  if (!file.is_open()) {
+    throw std::runtime_error(std::format("Can not Open the File : {} ", path));
+  }
+
+  std::stringstream buffer;
+  buffer << file.rdbuf();
+  return buffer.str();
+}
+
+unsigned int CompileShader(GLenum type, const std::string& shaderSource) {
   unsigned int shader;
   shader = glCreateShader(type);
 
@@ -50,8 +65,7 @@ static unsigned int CompileShader(GLenum type, const std::string& shaderSource) 
   return shader;
 }
 
-static unsigned int CreateShader(const std::string& vertexShader,
-                                 const std::string& fragmentShader) {
+unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
   unsigned int program;
   program = glCreateProgram();
 
@@ -78,29 +92,8 @@ static unsigned int CreateShader(const std::string& vertexShader,
 }
 
 Output CreateTriangle() {
-  std::string vertexSrc = R"(
-    #version 330 core
-
-    layout (location = 0) in vec3 pos;
-    layout (location = 1) in vec3 inColor;
-
-    out vec3 color;
-
-    void main() {
-      gl_Position = vec4(pos.xyz,1.0);
-      color = inColor;
-    }
-  )";
-  std::string fragmentSrc = R"(
-    #version 330 core
-
-    in vec3 color;
-    out vec4 fragment;
-
-    void main() {
-      fragment = vec4(color, 1.0f);
-    }
-  )";
+  std::string vertexSrc = ReadFile("../assets/shaders/basic.vs");
+  std::string fragmentSrc = ReadFile("../assets/shaders/basic.fs");
 
   unsigned int program = CreateShader(vertexSrc, fragmentSrc);
 
