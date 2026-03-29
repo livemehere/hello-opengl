@@ -1,5 +1,6 @@
 #include <OpenGL/gl.h>
 #include <OpenGL/glext.h>
+#include <OpenGL/gltypes.h>
 
 #include <stdexcept>
 #define GLFW_INCLUDE_NONE
@@ -14,6 +15,46 @@
 
 #define log spdlog::info
 #define errorLog spdlog::error
+
+GLenum glCheckError_(const char* file, int line) {
+  GLenum errorCode = GL_NO_ERROR;
+  while ((errorCode = glGetError()) != GL_NO_ERROR) {
+    std::string error;
+    switch (errorCode) {
+      case GL_INVALID_ENUM:
+        error = "INVALID_ENUM";
+        break;
+      case GL_INVALID_VALUE:
+        error = "INVALID_VALUE";
+        break;
+      case GL_INVALID_OPERATION:
+        error = "INVALID_OPERATION";
+        break;
+      case GL_STACK_OVERFLOW:
+        error = "STACK_OVERFLOW";
+        break;
+      case GL_STACK_UNDERFLOW:
+        error = "STACK_UNDERFLOW";
+        break;
+      case GL_OUT_OF_MEMORY:
+        error = "OUT_OF_MEMORY";
+        break;
+      case GL_INVALID_FRAMEBUFFER_OPERATION:
+        error = "INVALID_FRAMEBUFFER_OPERATION";
+        break;
+    }
+    errorLog("{} | {} ({})", error, file, line);
+    return errorCode;
+  }
+  return errorCode;
+}
+#define glCheckError() glCheckError_(__FILE__, __LINE__)
+#define ASSERT(x) \
+  if (!(x)) __builtin_debugtrap();
+
+#define GLCall(x) \
+  x;              \
+  ASSERT(glCheckError() == GL_NO_ERROR)
 
 struct Output {
   unsigned int program;
@@ -84,12 +125,13 @@ unsigned int CreateShader(const std::string& vertexShader, const std::string& fr
   if (!success) {
     glGetProgramInfoLog(program, 512, NULL, infoLog);
     errorLog("Program Link Error : {}", infoLog);
+  } else {
+    log("program link success");
   }
 
   glDeleteShader(vs);
   glDeleteShader(fs);
 
-  log("program link success");
   return program;
 }
 
