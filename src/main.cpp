@@ -215,13 +215,22 @@ int main() {
 
   // create
   auto output = CreateTriangle();
+  int colorLoc = glGetUniformLocation(output.program, "u_color");
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
 
+    float time = glfwGetTime();
+
     // use
     glUseProgram(output.program);
+
+    float r = (sin(time) + 1.0f) / 2.0f;
+    float g = (sin(time + 2.0f) + 1.0f) / 2.0f;
+    float b = (sin(time + 3.0f) + 1.0f) / 2.0f;
+    glUniform4f(colorLoc, r, g, b, 1.0f);
+
     glBindVertexArray(output.VAO);
     // glDrawArrays(GL_TRIANGLES, 0, output.totalPoints);
     glDrawElements(GL_TRIANGLES, output.totalIndicies, GL_UNSIGNED_INT, NULL);
