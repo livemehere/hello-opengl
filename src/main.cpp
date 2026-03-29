@@ -210,6 +210,7 @@ int main() {
   }
 
   glfwMakeContextCurrent(window);
+  glfwSwapInterval(1);
 
   DebugEnv();
 
