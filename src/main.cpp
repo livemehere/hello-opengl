@@ -104,7 +104,7 @@ int main() {
       float g = (sin(time + 2.0f) + 1.0f) / 2.0f;
       float b = (sin(time + 3.0f) + 1.0f) / 2.0f;
       shader.SetUniform4f("u_color", r, g, b, 1.0f);
-      glDrawElements(GL_TRIANGLES, indicies.size(), GL_UNSIGNED_INT, NULL);
+      glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, NULL);
 
       va.UnBind();
       vb.UnBind();
