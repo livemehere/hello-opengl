@@ -11,13 +11,15 @@
 #include <fstream>
 #include <vector>
 
-#include "Engine/Debug.h"
+#include "Engine/Debug.hpp"
+#include "Engine/IndexBuffer.hpp"
+#include "Engine/VertexBuffer.hpp"
 
 struct Output {
   unsigned int program;
   unsigned int VAO;
-  unsigned int VBO;
-  unsigned int EBO;
+  VertexBuffer vb;
+  IndexBuffer ib;
   int totalPoints;
   int totalIndicies;
 };
@@ -119,19 +121,15 @@ Output CreateTriangle() {
   int totalIndicies = indicies.size();
 
   // 사이즈, 데이터의 시작 포인터를 GPU 에 할당.
-  unsigned int VBO, VAO, EBO;
-  glGenBuffers(1, &VBO);
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &EBO);
+  unsigned int VAO;
+  VertexBuffer vb(buffers.data(), buffers.size() * sizeof(float));
+  IndexBuffer ib(indicies.data(), indicies.size() * sizeof(int));
 
+  glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
 
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, buffers.size() * sizeof(float), buffers.data(), GL_STATIC_DRAW);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(unsigned int), indicies.data(),
-               GL_STATIC_DRAW);
+  vb.Bind();
+  ib.Bind();
 
   int posLayout = 0;
   // layout 0번 / 3개씩 써라 / float 타입 / normalize 안함 / 3 * float 간격 / 오프셋 0
@@ -144,7 +142,7 @@ Output CreateTriangle() {
 
   glBindVertexArray(0);
 
-  return {program, VAO, VBO, EBO, totalPoints, totalIndicies};
+  return {program, VAO, vb, ib, totalPoints, totalIndicies};
 }
 
 int main() {
@@ -200,8 +198,8 @@ int main() {
 
   // clean up
   glDeleteVertexArrays(1, &output.VAO);
-  glDeleteBuffers(1, &output.VBO);
-  glDeleteBuffers(1, &output.EBO);
+  output.vb.UnBind();
+  output.ib.UnBind();
   glDeleteProgram(output.program);
 
   glfwTerminate();
