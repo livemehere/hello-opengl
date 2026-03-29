@@ -99,9 +99,13 @@ Output CreateTriangle() {
 
   // clang-format off
   std::vector<float> buffers = {
-      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,// left
-      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // right
-      0.0f, 0.5f, 0.0f,0.0f, 0.0f, 1.0f // top
+      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,// bl
+      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // br
+      0.5f, 0.5f, 0.0f,0.0f, 0.0f, 1.0f, // tr
+
+      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,// bl
+      0.5f, 0.5f, 0.0f,0.0f, 0.0f, 1.0f, // tr
+      -0.5f, 0.5f, 0.0f,0.0f, 0.0f, 1.0f // tl
   };
   // clang-format on
   int count = 6;
