@@ -182,7 +182,7 @@ int main() {
     glUseProgram(output.program);
     glBindVertexArray(output.VAO);
     // glDrawArrays(GL_TRIANGLES, 0, output.totalPoints);
-    glDrawElements(GL_TRIANGLES, output.totalIndicies, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, output.totalIndicies, GL_UNSIGNED_INT, NULL);
 
     glfwSwapBuffers(window);
 
